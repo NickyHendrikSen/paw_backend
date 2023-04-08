@@ -14,11 +14,6 @@ exports.register = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(422).send({
       errorMessage: errors.array()[0].msg,
-      oldInput: {
-        email: email,
-        password: password,
-        confirmPassword: req.body.confirmPassword
-      },
       validationErrors: errors.array()
     });
   }
@@ -36,6 +31,7 @@ exports.register = (req, res, next) => {
       user.save().then(data => {
         return res.status(200).send({
           status: "success",
+          message: 'User created!',
           user: data
         })
       });
