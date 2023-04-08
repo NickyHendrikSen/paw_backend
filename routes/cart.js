@@ -14,14 +14,15 @@ router.post('/cart', isAuth,
       .withMessage('Number field must be numeric')
       .custom((value) => {
         if (value <= 0) {
-            console.log("test1");
           throw new Error('Number field must be greater than 0');
         }
-        console.log("test");
         return true;
       })
   ],
   cartController.addToCart);
-router.get('/cart', cartController.getCart);
+
+router.get('/cart', isAuth, cartController.getCart);
+
+// router.delete('/cart', isAuth, cartController.deleteCart);
 
 module.exports = router;

@@ -3,16 +3,19 @@ const Product = require('../models/product');
 const User = require('../models/user');
 
 exports.getCart = (req, res, next) => {
-  req.user
-    .populate('cart.items.productId')
-    .execPopulate()
-    .then(user => {
-      const products = user.cart.items;
-      res.render('shop/cart', {
-        path: '/cart',
-        pageTitle: 'Your Cart',
-        products: products
-      });
+  User.findById(req.userId)
+    .then((user) => {
+      user
+        .populate('cart.items._product')
+        .then(user => {
+          const products = user.cart.items;
+          res.status(200).send({message: "success", cart: products})
+        })
+        .catch(err => {
+          const error = new Error(err);
+          error.httpStatusCode = 500;
+          return next(error);
+        });
     })
     .catch(err => {
       const error = new Error(err);

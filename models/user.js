@@ -18,7 +18,7 @@ const userSchema = new Schema({
   cart: {
     items: [
       {
-        productId: {
+        _product: {
           type: Schema.Types.ObjectId,
           ref: 'Product',
           required: true
@@ -31,7 +31,7 @@ const userSchema = new Schema({
 
 userSchema.methods.addToCart = function(product, quantity) {
   const cartProductIndex = this.cart.items.findIndex(cp => {
-    return cp.productId.toString() === product._id.toString();
+    return cp._product.toString() === product._id.toString();
   });
   let newQuantity = 1;
   const updatedCartItems = [...this.cart.items];
@@ -44,8 +44,8 @@ userSchema.methods.addToCart = function(product, quantity) {
     updatedCartItems[cartProductIndex].quantity = newQuantity;
   } else {
     updatedCartItems.push({
-      productId: product._id,
-      quantity: newQuantity
+      _product: product._id,
+      quantity: quantity
     });
   }
   const updatedCart = {
@@ -57,7 +57,7 @@ userSchema.methods.addToCart = function(product, quantity) {
 
 userSchema.methods.removeFromCart = function(productId) {
   const updatedCartItems = this.cart.items.filter(item => {
-    return item.productId.toString() !== productId.toString();
+    return item._product.toString() !== productId.toString();
   });
   this.cart.items = updatedCartItems;
   return this.save();
