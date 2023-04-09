@@ -23,6 +23,6 @@ router.post('/cart', isAuth,
 
 router.get('/cart', isAuth, cartController.getCart);
 
-// router.delete('/cart', isAuth, cartController.deleteCart);
+router.delete('/cart/:productId', isAuth, cartController.deleteCart);
 
 module.exports = router;

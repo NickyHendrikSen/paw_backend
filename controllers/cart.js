@@ -64,3 +64,35 @@ exports.addToCart = (req, res, next) => {
       return next(error);
     });
 };
+
+exports.deleteCart = (req, res, next) => {
+  const prodId = req.params.productId;
+  
+  User.findById(req.userId)
+    .then((user) => {
+      Product.findById(prodId)
+        .then(product => {
+          if(!product) {
+            const err = new Error("Product not found");
+            err.httpStatusCode = 500;
+            return next(err);
+          };
+          return user.removeFromCart(prodId);
+        })
+        .then(result => {
+          if(result) {
+            res.status(200).send({message: "success", result: result})
+          }
+        })
+        .catch(err => {
+          const error = new Error(err);
+          error.httpStatusCode = 500;
+          return next(error);
+        });
+    })
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+};
