@@ -6,9 +6,11 @@ exports.getProducts = (req, res, next) => {
   const query = req.query;
   
   const categories = query["categories"]?.split(",");
+  const sort = query["sort"];
   const search = new RegExp(query["search"], 'i');
 
-  Product.find({...(categories && {category: categories}), name: {$regex: search}}).then((products) => {
+  Product.find({...(categories && {category: categories}), name: {$regex: search}})
+    .sort({}).then((products) => {
     return res.status(200).send(products);
   })
   .catch(err => {
