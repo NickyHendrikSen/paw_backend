@@ -49,6 +49,7 @@ exports.login = (req, res, next) => {
   const password = req.body.password;
   let loadedUser;
   User.findOne({ email: email })
+    .select('+password')
     .then(user => {
       if (!user) {
         const error = new Error('A user with this email could not be found.');
