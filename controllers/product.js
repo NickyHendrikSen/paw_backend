@@ -9,8 +9,10 @@ exports.getProducts = (req, res, next) => {
   const sort = query["sort"];
   const search = new RegExp(query["search"], 'i');
 
+  const availableSort = ["date_desc", "date_asc", "name_asc", "name_desc", "price_asc", "price_desc"];
+
   Product.find({...(categories && {category: categories}), name: {$regex: search}})
-    .sort({}).then((products) => {
+    .sort(availableSort.indexOf(sort) ? [[sort.split("_")[0], sort.split("_")[1]]] : {}).then((products) => {
     return res.status(200).send(products);
   })
   .catch(err => {
