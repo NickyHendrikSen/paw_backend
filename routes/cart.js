@@ -22,6 +22,7 @@ router.post('/cart', isAuth,
   cartController.addToCart);
 
 router.get('/cart', isAuth, cartController.getCart);
+router.get('/checkout', isAuth, cartController.getCheckout);
 
 router.delete('/cart/:productId', isAuth, cartController.deleteCart);
 

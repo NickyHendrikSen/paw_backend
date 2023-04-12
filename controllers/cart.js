@@ -2,6 +2,8 @@ const { validationResult } = require('express-validator');
 const Product = require('../models/product');
 const User = require('../models/user');
 
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
 exports.getCart = (req, res, next) => {
   User.findById(req.userId)
     .then((user) => {
@@ -89,6 +91,54 @@ exports.deleteCart = (req, res, next) => {
           error.httpStatusCode = 500;
           return next(error);
         });
+    })
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+};
+
+exports.getCheckout = (req, res, next) => {
+  let products;
+  let total = 0;
+  User.findById(req.userId)
+    .then((user) => {
+    user
+      .populate('cart.items._product')
+      .then(user => {
+        products = user.cart.items;
+        total = 0;
+        products.forEach(p => {
+          total += p.quantity * p._product.price;
+        });
+
+        return stripe.checkout.sessions.create({
+          payment_method_types: ['card'],
+          line_items: products.map(p => {
+            return {
+              name: p._product.name,
+              description: p._product.category,
+              amount: p._product.price * 100,
+              currency: 'usd',
+              quantity: p.quantity
+            };
+          }),
+          success_url: req.protocol + '://' + req.get('host') + '/checkout/success', // => http://localhost:3000
+          cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel'
+        });
+      })
+      .then(session => {
+        return res.status(200).send({message: "success", data: {
+          products: products,
+          totalSum: total,
+          sessionId: session.id}})
+      })
+      .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      });
     })
     .catch(err => {
       const error = new Error(err);
