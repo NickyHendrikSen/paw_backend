@@ -124,11 +124,13 @@ exports.getCheckout = (req, res, next) => {
               quantity: p.quantity
             };
           }),
-          success_url: req.protocol + '://' + req.get('host') + '/checkout/success', // => http://localhost:3000
-          cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel'
+          success_url: process.env.FRONTEND_URL + '/checkout/success?session_id={CHECKOUT_SESSION_ID}',
+          // cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel={CHECKOUT_SESSION_ID}'
         });
       })
       .then(session => {
+        user.checkout_session_id = session.id;
+        user.save();
         return res.status(200).send({message: "success", data: {
           products: products,
           totalSum: total,

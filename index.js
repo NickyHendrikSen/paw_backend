@@ -13,6 +13,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/product');
 const cartRoutes = require('./routes/cart');
+const stripeRoutes = require('./routes/stripe');
 
 app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: false }));
@@ -33,6 +34,7 @@ app.use(cors());
 app.use(authRoutes);
 app.use(productRoutes);
 app.use(cartRoutes);
+app.use(stripeRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello, world!');

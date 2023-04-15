@@ -32,6 +32,10 @@ const userSchema = new Schema({
         quantity: { type: Number, required: true }
       }
     ]
+  },
+  checkout_session_id: {
+    type: String,
+    required: false
   }
 });
 
