@@ -115,6 +115,20 @@ exports.getCheckout = (req, res, next) => {
 
         return stripe.checkout.sessions.create({
           payment_method_types: ['card'],
+          shipping_address_collection: {allowed_countries: ['US', 'CA']},
+          shipping_options: [
+            {
+              shipping_rate_data: {
+                type: 'fixed_amount',
+                fixed_amount: {amount: 500, currency: 'usd'},
+                display_name: 'Flat rate Shipping',
+                delivery_estimate: {
+                  minimum: {unit: 'business_day', value: 3},
+                  maximum: {unit: 'business_day', value: 7},
+                },
+              },
+            },
+          ],
           line_items: products.map(p => {
             return {
               name: p._product.name,

@@ -15,12 +15,14 @@ exports.webhook = (req, res, next) => {
     .then(user => {
 
       if(!user) {
-        return res.sendStatus(404);
+        const error = new Error('Could not find user.');
+        error.statusCode = 404;
+        throw error;
       }
       
       let subtotal = 0;
       const products = user.cart.items.map(i => {
-        subtotal+= i._product.price;
+        subtotal+= i._product.price*i.quantitys;
         return { quantity: i.quantity, _product: i._product._id, price: i._product.price };
       });
 

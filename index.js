@@ -14,6 +14,7 @@ const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/product');
 const cartRoutes = require('./routes/cart');
 const stripeRoutes = require('./routes/stripe');
+const orderRoutes = require('./routes/order');
 
 app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: false }));
@@ -35,6 +36,7 @@ app.use(authRoutes);
 app.use(productRoutes);
 app.use(cartRoutes);
 app.use(stripeRoutes);
+app.use(orderRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello, world!');
