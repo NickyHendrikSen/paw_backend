@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const Order = require('../models/order');
+const Invoice = require('../models/invoice');
 const User = require('../models/user');
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -35,11 +36,25 @@ exports.webhook = (req, res, next) => {
         stripe_total: checkoutSession.amount_total/100,
         checkout_session: checkoutSession
       });
-      order.save();
-      return user;
+      const newOrder = order.save();
+      if(newOrder) {
+        // user.clearCart();
+      }
+      return newOrder;
     })
-    .then(user => {
-      return user.clearCart();
+    .then(order => {
+      console.log("order");
+      const invoice = new Invoice({
+        _order: order._id,
+      });
+      return invoice.save();
+    })
+    .then(invoice => {
+      console.log("invoice");
+      const order = Order.findOneAndUpdate({_id: invoice._order}, {_invoice: invoice._id}, {
+        returnOriginal: false
+      });
+      return order;
     })
     .then(() => {
       res.sendStatus(200);

@@ -18,6 +18,7 @@ exports.getOrder = (req, res, next) => {
   const orderId = req.params.orderId;
   Order.findById(orderId)
     .populate('products._product')
+    .populate('_invoice')
     .then(order => {
       if (!order) {
         const error = new Error('Could not find order.');
