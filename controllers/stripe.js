@@ -22,7 +22,7 @@ exports.webhook = (req, res, next) => {
       
       let subtotal = 0;
       const products = user.cart.items.map(i => {
-        subtotal+= i._product.price*i.quantitys;
+        subtotal+= i._product.price*i.quantity;
         return { quantity: i.quantity, _product: i._product._id, price: i._product.price };
       });
 

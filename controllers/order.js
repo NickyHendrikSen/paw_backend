@@ -17,8 +17,8 @@ exports.getOrdersByUserId = (req, res, next) => {
 exports.getOrder = (req, res, next) => {
   const orderId = req.params.orderId;
   Order.findById(orderId)
+    .populate('products._product')
     .then(order => {
-      console.log(order);
       if (!order) {
         const error = new Error('Could not find order.');
         error.statusCode = 404;
