@@ -11,7 +11,8 @@ exports.getProducts = (req, res, next) => {
 
   const availableSort = ["date_desc", "date_asc", "name_asc", "name_desc", "price_asc", "price_desc"];
 
-  Product.find({...(categories && {category: categories}), name: {$regex: search}})
+  Product.find({...(categories && {_category: categories}), name: {$regex: search}})
+    .populate("_category")
     .sort(availableSort.indexOf(sort) ? [[sort.split("_")[0], sort.split("_")[1]]] : {}).then((products) => {
     return res.status(200).send(products);
   })
@@ -25,6 +26,7 @@ exports.getProducts = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
   const productId = req.params.productId;
   Product.findById(productId)
+    .populate("_category")
     .then(product => {
       if (!product) {
         const error = new Error('Could not find product.');

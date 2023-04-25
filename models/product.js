@@ -16,11 +16,16 @@ const productSchema = new Schema(
       type: String,
       required: true
     },
-    category: {
-      type: String,
-      enum: ['apparel', 'collar', 'treat', 'leash', 'toy', 'food'],
-      required: true
+    _category: {
+      type: Schema.Types.ObjectId,
+      ref: 'Category', 
+      required: true 
     },
+    // category: {
+    //   type: String,
+    //   enum: ['apparel', 'collar', 'treat', 'leash', 'toy', 'food'],
+    //   required: true
+    // },
     price: {
       type: Number,
       required: true

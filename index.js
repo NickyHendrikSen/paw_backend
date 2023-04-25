@@ -7,6 +7,7 @@ const app = express();
 const cors = require('cors')
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+require("./models/category");
 
 const MONGODB_URI = process.env.MONGODB_URI;
 

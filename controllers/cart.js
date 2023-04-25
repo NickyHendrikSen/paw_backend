@@ -8,7 +8,12 @@ exports.getCart = (req, res, next) => {
   User.findById(req.userId)
     .then((user) => {
       user
-        .populate('cart.items._product')
+        .populate({
+          path: 'cart.items._product',
+          populate: {
+            path: "_category"
+          }
+        })
         .then(user => {
           const products = user.cart.items;
           res.status(200).send({message: "success", cart: products})
@@ -132,7 +137,7 @@ exports.getCheckout = (req, res, next) => {
           line_items: products.map(p => {
             return {
               name: p._product.name,
-              description: p._product.category,
+              description: p._product._category.display_name,
               amount: p._product.price * 100,
               currency: 'usd',
               quantity: p.quantity
