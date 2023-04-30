@@ -2,10 +2,30 @@ const { validationResult } = require('express-validator');
 const Order = require('../models/order');
 
 exports.getOrdersByUserId = (req, res, next) => {
-  Order.find({_user: req.userId})
+  const query = req.query;
+  
+  const minDate = query["min_date"];
+  const maxDate = query["max_date"];
+  const page = isNaN(query["page"]) ? 0 : query["page"]-1;
+  const skip = 10;
+
+  const filter = {_user: req.userId, ...(minDate || maxDate ? {createdAt: {
+    ...(minDate ? {$gte: new Date(minDate)} : {}), 
+    ...(maxDate ? {$lte: new Date(maxDate)} : {}), 
+  }} : {}) };
+
+  Order.find(filter)
     .populate('products._product')
+    .sort('+createdAt')
+    .skip(skip*page)
+    .limit(skip)
     .then((orders) => {
-      res.status(200).send({message: "success", orders: orders})
+      Order.countDocuments(filter)
+      .then((count) => {
+        res.status(200).send({message: "success", orders: orders, 
+          pagination: {pageCount: Math.ceil(count/skip), count: count, skip: skip}
+        })
+      })
     })
     .catch(err => {
       const error = new Error(err);
