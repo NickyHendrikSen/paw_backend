@@ -9,13 +9,26 @@ exports.getProducts = (req, res, next) => {
   const sort = query["sort"];
   const search = new RegExp(query["search"], 'i');
 
+  const page = isNaN(query["page"]) ? 0 : query["page"]-1;
+  const skip = 10;
+
   const availableSort = ["date_desc", "date_asc", "name_asc", "name_desc", "price_asc", "price_desc"];
 
-  Product.find({...(categories && {_category: categories}), name: {$regex: search}})
+  const filter = {...(categories && {_category: categories}), name: {$regex: search}};
+
+  Product.find(filter)
     .populate("_category")
-    .sort(availableSort.indexOf(sort) ? [[sort.split("_")[0], sort.split("_")[1]]] : {}).then((products) => {
-    return res.status(200).send(products);
-  })
+    .skip(skip*page)
+    .limit(skip)
+    .sort(availableSort.indexOf(sort) ? [[sort.split("_")[0], sort.split("_")[1]]] : {})
+    .then((products) => {
+      Product.countDocuments(filter)
+      .then((count) => {
+        res.status(200).send({message: "success", products: products, 
+          pagination: {pageCount: Math.ceil(count/skip), count: count, skip: skip}
+        });
+      })
+    })
   .catch(err => {
     const error = new Error(err);
     error.httpStatusCode = 500;
