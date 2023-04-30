@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 
 const Product = require('../models/product');
+const Category = require('../models/category');
 
 exports.getProducts = (req, res, next) => {
   const query = req.query;
@@ -14,16 +15,33 @@ exports.getProducts = (req, res, next) => {
 
   const availableSort = ["date_desc", "date_asc", "name_asc", "name_desc", "price_asc", "price_desc"];
 
-  const filter = {...(categories && {_category: categories}), name: {$regex: search}};
+  const filter = {name: {$regex: search}};
+  const aggregateFilter = [{
+    $lookup: {
+        from: Category.collection.name,
+        localField: "_category",
+        foreignField: "_id",
+        as: "_category"
+    }
+  }, {
+      $unwind: "$_category"
+  }, {
+      $match: {
+        ...(categories && {'_category.slug': { "$in": categories}})
+      }
+  }, 
+  ];
 
-  Product.find(filter)
-    .populate("_category")
+  Product.aggregate(aggregateFilter)
+  // .findOne(filter)
+    // .populate("_category")
     .skip(skip*page)
     .limit(skip)
-    .sort(availableSort.indexOf(sort) ? [[sort.split("_")[0], sort.split("_")[1]]] : {})
+    // .sort(availableSort.indexOf(sort) ? [[sort.split("_")[0], sort.split("_")[1]]] : {})
     .then((products) => {
-      Product.countDocuments(filter)
-      .then((count) => {
+      Product.aggregate([...aggregateFilter, {$count: "count"}])
+      .then((result) => {
+        const { count } = result[0];
         res.status(200).send({message: "success", products: products, 
           pagination: {pageCount: Math.ceil(count/skip), count: count, skip: skip}
         });
