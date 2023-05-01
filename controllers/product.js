@@ -7,13 +7,15 @@ exports.getProducts = (req, res, next) => {
   const query = req.query;
   
   const categories = query["categories"]?.split(",");
-  const sort = query["sort"];
+  const sort = query["sort"] ?? "name_asc";
   const search = new RegExp(query["search"], 'i');
 
   const page = isNaN(query["page"]) ? 0 : query["page"]-1;
   const skip = 10;
 
-  const availableSort = ["date_desc", "date_asc", "name_asc", "name_desc", "price_asc", "price_desc"];
+  const availableSort = [{"date_asc" : {date: 1}}, {"date_desc" : {date: -1}}, 
+                        {"name_asc" : {name: 1}}, {"name_desc" : {name: -1}}, 
+                        {"price_asc" : {price: 1}}, {"price_desc" : {price: -1}}];
 
   const filter = {name: {$regex: search}};
   const aggregateFilter = [{
@@ -24,24 +26,35 @@ exports.getProducts = (req, res, next) => {
         as: "_category"
     }
   }, {
-      $unwind: "$_category"
+    $unwind: "$_category"
+  }, {
+    $unwind: "$name"
   }, {
       $match: {
         ...(categories && {'_category.slug': { "$in": categories}})
+        
       }
-  }, 
+  }, {
+    $match: {
+      ...(filter && filter)
+    }
+  },
+  {
+    $sort : availableSort.find(x => sort in x)[sort] ?? {} 
+  }
   ];
 
-  Product.aggregate(aggregateFilter)
+  Product
+    .aggregate(aggregateFilter)
   // .findOne(filter)
     // .populate("_category")
     .skip(skip*page)
     .limit(skip)
-    // .sort(availableSort.indexOf(sort) ? [[sort.split("_")[0], sort.split("_")[1]]] : {})
+    // .sort()
     .then((products) => {
       Product.aggregate([...aggregateFilter, {$count: "count"}])
       .then((result) => {
-        const { count } = result[0];
+        const { count } = result[0] || 0;
         res.status(200).send({message: "success", products: products, 
           pagination: {pageCount: Math.ceil(count/skip), count: count, skip: skip}
         });
