@@ -38,7 +38,7 @@ exports.webhook = (req, res, next) => {
       });
       const newOrder = order.save();
       if(newOrder) {
-        // user.clearCart();
+        user.clearCart();
       }
       return newOrder;
     })
