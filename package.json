@@ -13,7 +13,6 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-validator": "^6.15.0",
     "jsonwebtoken": "^9.0.0",
@@ -21,5 +20,9 @@
     "mongoose-sequence": "^5.3.1",
     "nodemon": "^2.0.22",
     "stripe": "^7.11.0"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^8.2.0",
+    "dotenv": "^16.3.1"
   }
 }
